@@ -20,7 +20,7 @@ const dbName = getEnv('DB_NAME', 'booking_kampus')
 const dbSsl = getEnv('DB_SSL', '')
 
 const sslConfig = dbSsl === 'true'
-  ? { rejectUnauthorized: true }
+  ? { rejectUnauthorized: false }
   : undefined
 
 const adapter = new PrismaMariaDb({

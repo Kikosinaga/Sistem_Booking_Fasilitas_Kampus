@@ -20,7 +20,7 @@ function createPrismaClient() {
   const dbSsl = getEnv('DB_SSL', '')
 
   const sslConfig = dbSsl === 'true'
-    ? { rejectUnauthorized: true }
+    ? { rejectUnauthorized: false }
     : undefined
 
   console.log('[Prisma Init] Connecting to Host:', dbHost, '| Port:', dbPort, '| User:', dbUser, '| DB:', dbName, '| SSL:', !!sslConfig)
