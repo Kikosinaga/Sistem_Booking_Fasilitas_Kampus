@@ -1,0 +1,236 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  MAHASISWA
+  DOSEN
+  EKSTERNAL
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  QRIS
+  BANK_TRANSFER
+  EWALLET
+  FREE
+}
+
+enum FacilityType {
+  AULA
+  GEDUNG
+  LAPANGAN
+  GOR
+}
+
+enum DocumentType {
+  KTM
+  PROPOSAL
+  PAYMENT_PROOF
+  OTHER
+}
+
+enum NotificationType {
+  BOOKING_SUBMITTED
+  BOOKING_APPROVED
+  BOOKING_REJECTED
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  REMINDER
+  GENERAL
+}
+
+// ==========================================
+// USER MODEL
+// ==========================================
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(MAHASISWA)
+  nim           String?   // Nomor Induk Mahasiswa
+  nip           String?   // Nomor Induk Pegawai (Dosen)
+  phone         String?
+  organization  String?   // Untuk eksternal
+  image         String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  bookings      Booking[]
+  notifications Notification[]
+  qrScans       QRVerification[] @relation("ScannedBy")
+
+  @@map("users")
+}
+
+// ==========================================
+// FACILITY MODEL
+// ==========================================
+model Facility {
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  type          FacilityType
+  description   String       @db.Text
+  capacity      Int
+  location      String
+  images        Json         // Array of image URLs
+  pricePerHour  Float        @default(0) // 0 = gratis
+  isActive      Boolean      @default(true)
+  amenities     Json         // Fasilitas tambahan (AC, Projector, dll)
+  rules         String?      @db.Text // Peraturan penggunaan
+  openTime      String       @default("08:00") // Jam buka
+  closeTime     String       @default("22:00") // Jam tutup
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  bookings      Booking[]
+
+  @@map("facilities")
+}
+
+// ==========================================
+// BOOKING MODEL
+// ==========================================
+model Booking {
+  id            String        @id @default(cuid())
+  userId        String
+  facilityId    String
+  title         String        // Nama kegiatan
+  description   String?       @db.Text
+  organization  String?       // Organisasi penyelenggara
+  startTime     DateTime
+  endTime       DateTime
+  attendees     Int?          // Jumlah peserta
+  status        BookingStatus @default(PENDING)
+  totalPrice    Float         @default(0)
+  paymentStatus PaymentStatus @default(UNPAID)
+  paymentMethod PaymentMethod? // Metode pembayaran yang dipilih user
+  adminNote     String?       @db.Text // Catatan dari admin
+  isFree        Boolean       @default(false) // True jika mahasiswa
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facility      Facility      @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  payment       Payment?
+  documents     Document[]
+  qrVerification QRVerification?
+  notifications Notification[]
+
+  @@index([facilityId, startTime, endTime])
+  @@index([userId])
+  @@index([status])
+  @@index([startTime])
+  @@map("bookings")
+}
+
+// ==========================================
+// PAYMENT MODEL
+// ==========================================
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String        @unique
+  amount          Float
+  method          PaymentMethod @default(QRIS)
+  transactionId   String?       // ID dari Midtrans
+  snapToken       String?       // Midtrans Snap Token
+  qrisUrl         String?       // URL QR Code dari Midtrans
+  paymentUrl      String?       // URL pembayaran
+  status          PaymentStatus @default(PENDING)
+  paidAt          DateTime?
+  expiredAt       DateTime?
+  metadata        Json?         // Data tambahan dari gateway
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@map("payments")
+}
+
+// ==========================================
+// DOCUMENT MODEL (Upload persyaratan)
+// ==========================================
+model Document {
+  id           String       @id @default(cuid())
+  bookingId    String
+  fileName     String
+  fileUrl      String
+  fileSize     Int?         // Bytes
+  mimeType     String?
+  documentType DocumentType @default(OTHER)
+  uploadedAt   DateTime     @default(now())
+
+  booking      Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+// ==========================================
+// QR VERIFICATION MODEL
+// ==========================================
+model QRVerification {
+  id          String    @id @default(cuid())
+  bookingId   String    @unique
+  code        String    @unique @default(cuid()) // Unique QR code
+  scannedAt   DateTime?
+  scannedById String?
+  isValid     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  scannedBy   User?     @relation("ScannedBy", fields: [scannedById], references: [id])
+
+  @@map("qr_verifications")
+}
+
+// ==========================================
+// NOTIFICATION MODEL
+// ==========================================
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String           @db.Text
+  type      NotificationType @default(GENERAL)
+  isRead    Boolean          @default(false)
+  bookingId String?
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking   Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
