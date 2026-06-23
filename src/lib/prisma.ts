@@ -33,6 +33,7 @@ function createPrismaClient() {
     database: dbName,
     connectionLimit: 5,
     ssl: sslConfig,
+    connectTimeout: 15000,
   })
   return new PrismaClient({ adapter })
 }

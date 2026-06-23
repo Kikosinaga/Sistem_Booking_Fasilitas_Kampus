@@ -31,6 +31,7 @@ const adapter = new PrismaMariaDb({
   database: dbName,
   connectionLimit: 5,
   ssl: sslConfig,
+  connectTimeout: 15000,
 })
 const prisma = new PrismaClient({ adapter })
 
