@@ -13,28 +13,20 @@ function createPrismaClient() {
   }
 
   const dbHost = getEnv('DB_HOST', 'localhost')
-  const dbPort = Number(getEnv('DB_PORT', '3306'))
+  const dbPort = getEnv('DB_PORT', '3306')
   const dbUser = getEnv('DB_USER', 'root')
   const dbPassword = getEnv('DB_PASSWORD', '')
   const dbName = getEnv('DB_NAME', 'booking_kampus')
   const dbSsl = getEnv('DB_SSL', '')
 
-  const sslConfig = dbSsl === 'true'
-    ? { rejectUnauthorized: false }
-    : undefined
+  // Build connection string with connectTimeout embedded
+  // The mariadb driver accepts a connection string and parses all parameters from it
+  const sslParam = dbSsl === 'true' ? '&ssl=true' : ''
+  const connectionString = `mariadb://${encodeURIComponent(dbUser)}:${encodeURIComponent(dbPassword)}@${dbHost}:${dbPort}/${dbName}?connectTimeout=30000&acquireTimeout=30000${sslParam}`
 
-  console.log('[Prisma Init] Connecting to Host:', dbHost, '| Port:', dbPort, '| User:', dbUser, '| DB:', dbName, '| SSL:', !!sslConfig)
+  console.log('[Prisma Init] Connecting to Host:', dbHost, '| Port:', dbPort, '| User:', dbUser, '| DB:', dbName, '| SSL:', dbSsl)
 
-  const adapter = new PrismaMariaDb({
-    host: dbHost,
-    port: dbPort,
-    user: dbUser,
-    password: dbPassword,
-    database: dbName,
-    connectionLimit: 5,
-    ssl: sslConfig,
-    connectTimeout: 15000,
-  })
+  const adapter = new PrismaMariaDb(connectionString)
   return new PrismaClient({ adapter })
 }
 
