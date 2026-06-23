@@ -23,6 +23,8 @@ function createPrismaClient() {
     ? { rejectUnauthorized: true }
     : undefined
 
+  console.log('[Prisma Init] Connecting to Host:', dbHost, '| Port:', dbPort, '| User:', dbUser, '| DB:', dbName, '| SSL:', !!sslConfig)
+
   const adapter = new PrismaMariaDb({
     host: dbHost,
     port: dbPort,
