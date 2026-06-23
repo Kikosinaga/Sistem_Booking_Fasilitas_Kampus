@@ -6,16 +6,29 @@ import { PrismaClient } from '@prisma/client'
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import bcrypt from 'bcryptjs'
 
-const sslConfig = process.env.DB_SSL === 'true'
+const getEnv = (key: string, defaultValue: string = '') => {
+  const val = process.env[key]
+  if (!val) return defaultValue
+  return val.replace(/['"]/g, '')
+}
+
+const dbHost = getEnv('DB_HOST', 'localhost')
+const dbPort = Number(getEnv('DB_PORT', '3306'))
+const dbUser = getEnv('DB_USER', 'root')
+const dbPassword = getEnv('DB_PASSWORD', '')
+const dbName = getEnv('DB_NAME', 'booking_kampus')
+const dbSsl = getEnv('DB_SSL', '')
+
+const sslConfig = dbSsl === 'true'
   ? { rejectUnauthorized: true }
   : undefined
 
 const adapter = new PrismaMariaDb({
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'booking_kampus',
+  host: dbHost,
+  port: dbPort,
+  user: dbUser,
+  password: dbPassword,
+  database: dbName,
   connectionLimit: 5,
   ssl: sslConfig,
 })
