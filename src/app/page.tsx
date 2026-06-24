@@ -292,17 +292,24 @@ export default async function HomePage() {
             </div>
             <div className={styles.footerColumn}>
               <h4>Kontak</h4>
-              <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={16} style={{ color: 'var(--primary-400)' }} />
-                Jl. Kampus Raya No. 1
+              <p style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                <MapPin size={16} style={{ color: 'var(--primary-400)', marginTop: '2px', flexShrink: 0 }} />
+                <span>
+                  Jl. Kaharuddin Nasution 113,<br />
+                  Pekanbaru 28284<br />
+                  Riau - Indonesia
+                </span>
               </p>
               <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Mail size={16} style={{ color: 'var(--primary-400)' }} />
-                booking@kampus.ac.id
+                <Mail size={16} style={{ color: 'var(--primary-400)', flexShrink: 0 }} />
+                info@uir.ac.id
               </p>
-              <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Phone size={16} style={{ color: 'var(--primary-400)' }} />
-                (021) 123-4567
+              <p style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                <Phone size={16} style={{ color: 'var(--primary-400)', marginTop: '2px', flexShrink: 0 }} />
+                <span>
+                  Telepon ke +62 761 674674<br />
+                  atau WhatsApp di +62 811-777-1962
+                </span>
               </p>
             </div>
           </div>
