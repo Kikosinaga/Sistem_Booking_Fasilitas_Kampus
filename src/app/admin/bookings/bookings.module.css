@@ -229,3 +229,49 @@
   color: var(--warning-600);
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
+
+/* Export PDF Button */
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.813rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.25);
+  white-space: nowrap;
+}
+
+.exportBtn:hover {
+  background: linear-gradient(135deg, #166534, #15803d);
+  box-shadow: 0 4px 16px rgba(21, 128, 61, 0.35);
+  transform: translateY(-1px);
+}
+
+.exportBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(21, 128, 61, 0.2);
+}
+
+.exportBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.15);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.exportBtnSpinner {
+  animation: spin 1s linear infinite;
+}
+

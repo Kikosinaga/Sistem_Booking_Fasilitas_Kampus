@@ -10,6 +10,7 @@ import {
   BarChart3, ClipboardList, Building2, Globe, LogOut, FileText, 
   CheckSquare, XSquare, Contact, Receipt, Landmark, Smartphone, Coins 
 } from 'lucide-react'
+import ExportPDFButton from './ExportPDFButton'
 
 export default async function AdminBookingsPage() {
   const session = await auth()
@@ -64,6 +65,7 @@ export default async function AdminBookingsPage() {
             <h1 className={styles.pageTitle}>Kelola Booking</h1>
             <p className={styles.pageSubtitle}>{bookings.length} total booking</p>
           </div>
+          <ExportPDFButton />
         </div>
 
         <div className={styles.pageContent}>
