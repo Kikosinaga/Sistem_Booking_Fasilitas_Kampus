@@ -130,9 +130,8 @@ export async function approveBooking(bookingId: string, note?: string) {
       data: {
         userId: booking.userId,
         title: 'Booking Disetujui',
-        message: `Booking "${booking.title}" untuk ${booking.facility.name} telah disetujui.${
-          isFree ? '' : ' Silakan lakukan pembayaran.'
-        }`,
+        message: `Booking "${booking.title}" untuk ${booking.facility.name} telah disetujui.${isFree ? '' : ' Silakan lakukan pembayaran.'
+          }`,
         type: 'BOOKING_APPROVED',
         bookingId,
       },
@@ -291,8 +290,8 @@ export async function getDashboardStats() {
   const bookingTrend = lastMonthBookings > 0
     ? ((monthlyBookings - lastMonthBookings) / lastMonthBookings) * 100
     : monthlyBookings > 0
-    ? 100
-    : 0
+      ? 100
+      : 0
 
   return {
     totalBookings,
@@ -351,6 +350,27 @@ export async function createFacility(formData: FormData) {
   const pricePerHour = parseFloat(formData.get('pricePerHour') as string)
   const openTime = formData.get('openTime') as string
   const closeTime = formData.get('closeTime') as string
+  const rules = formData.get('rules') as string
+  const imagesRaw = formData.get('images') as string
+  const amenitiesRaw = formData.get('amenities') as string
+
+  let images: string[] = []
+  if (imagesRaw) {
+    try {
+      images = JSON.parse(imagesRaw)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  let amenities: string[] = []
+  if (amenitiesRaw) {
+    try {
+      amenities = JSON.parse(amenitiesRaw)
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   try {
     await prisma.facility.create({
@@ -364,17 +384,139 @@ export async function createFacility(formData: FormData) {
         pricePerHour,
         openTime: openTime || '08:00',
         closeTime: closeTime || '22:00',
-        images: [],
-        amenities: [],
+        rules: rules || '',
+        images,
+        amenities,
       },
+    })
+
+    revalidatePath('/admin/facilities')
+    revalidatePath('/')
+    return { success: true }
+  } catch (error) {
+    console.error('Gagal membuat fasilitas:', error)
+    return { error: 'Gagal membuat fasilitas' }
+  }
+}
+
+export async function updateFacility(id: string, formData: FormData) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return { error: 'Unauthorized' }
+  }
+
+  const name = formData.get('name') as string
+  const slug = formData.get('slug') as string
+  const type = formData.get('type') as string
+  const description = formData.get('description') as string
+  const capacity = parseInt(formData.get('capacity') as string)
+  const location = formData.get('location') as string
+  const pricePerHour = parseFloat(formData.get('pricePerHour') as string)
+  const openTime = formData.get('openTime') as string
+  const closeTime = formData.get('closeTime') as string
+  const rules = formData.get('rules') as string
+  const imagesRaw = formData.get('images') as string
+  const amenitiesRaw = formData.get('amenities') as string
+
+  let images: string[] = []
+  if (imagesRaw) {
+    try {
+      images = JSON.parse(imagesRaw)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  let amenities: string[] = []
+  if (amenitiesRaw) {
+    try {
+      amenities = JSON.parse(amenitiesRaw)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  try {
+    await prisma.facility.update({
+      where: { id },
+      data: {
+        name,
+        slug,
+        type: type as any,
+        description,
+        capacity,
+        location,
+        pricePerHour,
+        openTime: openTime || '08:00',
+        closeTime: closeTime || '22:00',
+        rules: rules || '',
+        images,
+        amenities,
+      },
+    })
+
+    revalidatePath('/admin/facilities')
+    revalidatePath(`/facilities/${slug}`)
+    revalidatePath('/')
+    return { success: true }
+  } catch (error) {
+    console.error('Gagal memperbarui fasilitas:', error)
+    return { error: 'Gagal memperbarui fasilitas' }
+  }
+}
+
+export async function deleteFacility(id: string) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return { error: 'Unauthorized' }
+  }
+
+  try {
+    const activeBookingsCount = await prisma.booking.count({
+      where: {
+        facilityId: id,
+        status: { in: ['PENDING', 'APPROVED', 'PAID', 'ACTIVE'] },
+      },
+    })
+
+    if (activeBookingsCount > 0) {
+      return {
+        error: 'Fasilitas tidak dapat dihapus karena memiliki booking aktif atau tertunda. Silakan nonaktifkan saja fasilitas ini jika ingin membatasi pemesanan baru.',
+      }
+    }
+
+    await prisma.facility.delete({
+      where: { id },
     })
 
     revalidatePath('/admin/facilities')
     return { success: true }
   } catch (error) {
-    return { error: 'Gagal membuat fasilitas' }
+    console.error('Gagal menghapus fasilitas:', error)
+    return { error: 'Gagal menghapus fasilitas' }
   }
 }
+
+export async function toggleFacilityStatus(id: string, isActive: boolean) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return { error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.facility.update({
+      where: { id },
+      data: { isActive },
+    })
+
+    revalidatePath('/admin/facilities')
+    return { success: true }
+  } catch (error) {
+    console.error('Gagal mengubah status fasilitas:', error)
+    return { error: 'Gagal mengubah status fasilitas' }
+  }
+}
+
 
 // Get notifications
 export async function getNotifications() {
@@ -458,8 +600,8 @@ export async function verifyQRCode(code: string) {
         where: { id: qr.scannedById || '' },
         select: { name: true }
       })
-      return { 
-        error: `QR Code ini sudah pernah digunakan untuk check-in pada ${new Date(qr.scannedAt).toLocaleString('id-ID')} oleh ${scannedUser?.name || 'Admin'}.` 
+      return {
+        error: `QR Code ini sudah pernah digunakan untuk check-in pada ${new Date(qr.scannedAt).toLocaleString('id-ID')} oleh ${scannedUser?.name || 'Admin'}.`
       }
     }
 
@@ -482,9 +624,9 @@ export async function verifyQRCode(code: string) {
     revalidatePath('/admin/bookings')
     revalidatePath('/dashboard')
 
-    return { 
-      success: true, 
-      booking: qr.booking 
+    return {
+      success: true,
+      booking: qr.booking
     }
   } catch (error) {
     console.error('Verify QR error:', error)
