@@ -20,7 +20,7 @@ export default async function AdminDashboardPage() {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
-            <img src="/logo uir.png" alt="Logo UIR" width={32} height={32} style={{ objectFit: 'contain' }} />
+            <img src="/logo-uir.png" alt="Logo UIR" width={32} height={32} style={{ objectFit: 'contain' }} />
           </div>
           <div>
             <div className={styles.sidebarBrand}>BookingKampus</div>
