@@ -80,9 +80,17 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
   async function uploadFile(
     file: File,
     documentType: string,
+    allowedTypes: string[],
+    friendlyLabel: string,
     setUploading: (v: boolean) => void,
     setUploaded: (v: UploadedFile | null) => void
   ) {
+    // Client-side type validation
+    if (!allowedTypes.includes(file.type)) {
+      setError(`Format file tidak didukung. Gunakan ${friendlyLabel}.`)
+      return
+    }
+
     setUploading(true)
     setError('')
 
@@ -119,6 +127,8 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
   function handleFileDrop(
     e: React.DragEvent,
     documentType: string,
+    allowedTypes: string[],
+    friendlyLabel: string,
     setUploading: (v: boolean) => void,
     setUploaded: (v: UploadedFile | null) => void
   ) {
@@ -126,19 +136,21 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
     e.stopPropagation()
     const file = e.dataTransfer.files?.[0]
     if (file) {
-      uploadFile(file, documentType, setUploading, setUploaded)
+      uploadFile(file, documentType, allowedTypes, friendlyLabel, setUploading, setUploaded)
     }
   }
 
   function handleFileSelect(
     e: React.ChangeEvent<HTMLInputElement>,
     documentType: string,
+    allowedTypes: string[],
+    friendlyLabel: string,
     setUploading: (v: boolean) => void,
     setUploaded: (v: UploadedFile | null) => void
   ) {
     const file = e.target.files?.[0]
     if (file) {
-      uploadFile(file, documentType, setUploading, setUploaded)
+      uploadFile(file, documentType, allowedTypes, friendlyLabel, setUploading, setUploaded)
     }
   }
 
@@ -220,8 +232,12 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
     documentType: string,
     setUploading: (v: boolean) => void,
     setUploaded: (v: UploadedFile | null) => void,
+    acceptTypes: string[],
+    acceptLabel: string,
     required: boolean = true
   ) {
+    const acceptString = acceptTypes.join(',')
+
     return (
       <div className={styles.formGroup}>
         <label className={styles.formLabel}>
@@ -262,7 +278,7 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
           <div
             className={`${styles.uploadDropzone} ${isUploading ? styles.uploadDropzoneUploading : ''}`}
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation() }}
-            onDrop={(e) => handleFileDrop(e, documentType, setUploading, setUploaded)}
+            onDrop={(e) => handleFileDrop(e, documentType, acceptTypes, acceptLabel, setUploading, setUploaded)}
             onClick={() => inputRef.current?.click()}
           >
             {isUploading ? (
@@ -277,16 +293,16 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
                   Klik atau drag file ke sini
                 </span>
                 <span className={styles.uploadSubtext}>
-                  JPG, PNG, WebP, atau PDF (maks. 5MB)
+                  {acceptLabel} (maks. 5MB)
                 </span>
               </>
             )}
             <input
               ref={inputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
+              accept={acceptString}
               className={styles.uploadInput}
-              onChange={(e) => handleFileSelect(e, documentType, setUploading, setUploaded)}
+              onChange={(e) => handleFileSelect(e, documentType, acceptTypes, acceptLabel, setUploading, setUploaded)}
             />
           </div>
         )}
@@ -401,19 +417,23 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
             ktmInputRef,
             'KTM',
             setUploadingKtm,
-            setKtmFile
+            setKtmFile,
+            ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'],
+            'JPG, PNG, atau PDF'
           )}
 
           {renderUploadArea(
             'Proposal Kegiatan',
-            'Upload proposal/surat kegiatan dalam format PDF atau gambar',
+            'Upload proposal/surat kegiatan dalam format PDF',
             '📋',
             proposalFile,
             uploadingProposal,
             proposalInputRef,
             'PROPOSAL',
             setUploadingProposal,
-            setProposalFile
+            setProposalFile,
+            ['application/pdf'],
+            'PDF'
           )}
         </div>
       )}
