@@ -208,7 +208,7 @@ export default async function HomePage() {
                 step: '04',
                 icon: Smartphone,
                 title: 'QR Code & Gunakan',
-                desc: 'Terima QR Code verifikasi dan gunakan fasilitas sesuai jadwal',
+                desc: 'Setelah disetujui, dapatkan QR Code akses di dashboard untuk check-in langsung di lokasi fasilitas',
               },
             ].map((item) => (
               <div key={item.step} className={styles.stepCard}>

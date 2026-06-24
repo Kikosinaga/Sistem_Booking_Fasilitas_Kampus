@@ -7,6 +7,7 @@ import Link from 'next/link'
 import styles from './dashboard.module.css'
 import PayButton from './PayButton'
 import NotificationBell from './NotificationBell'
+import QRButton from './QRButton'
 import { formatDate, formatTime, getBookingStatusLabel, getBookingStatusColor, formatCurrency } from '@/lib/utils'
 import { 
   Bell, ClipboardList, Hourglass, CheckCircle, Flag, Calendar, 
@@ -168,11 +169,14 @@ export default async function DashboardPage() {
                         <span className={`${styles.bookingStatus} ${badgeClass}`}>
                           {badgeText}
                         </span>
-                        {booking.qrVerification && !booking.isFree && (
-                          <span className={styles.qrBadge} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <QrCode size={12} />
-                            <span>QR Ready</span>
-                          </span>
+                        {booking.qrVerification && (
+                          <QRButton
+                            code={booking.qrVerification.code}
+                            facilityName={booking.facility.name}
+                            title={booking.title}
+                            startTime={booking.startTime.toISOString()}
+                            endTime={booking.endTime.toISOString()}
+                          />
                         )}
                       </div>
                     <h3 className={styles.bookingTitle}>{booking.title}</h3>

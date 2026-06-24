@@ -110,6 +110,21 @@ export async function approveBooking(bookingId: string, note?: string) {
       })
     }
 
+    // Generate QR code if it is a free booking
+    if (isFree) {
+      const existingQR = await tx.qRVerification.findUnique({
+        where: { bookingId }
+      })
+      if (!existingQR) {
+        await tx.qRVerification.create({
+          data: {
+            bookingId,
+            code: `BK-${bookingId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+          }
+        })
+      }
+    }
+
     // Notify user
     await tx.notification.create({
       data: {
@@ -407,3 +422,133 @@ export async function markAllNotificationsRead() {
   revalidatePath('/admin/dashboard')
   return { success: true }
 }
+
+// Verify QR Code (admin check-in)
+export async function verifyQRCode(code: string) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return { error: 'Akses ditolak. Hanya admin yang dapat memverifikasi QR Code.' }
+  }
+
+  try {
+    const qr = await prisma.qRVerification.findUnique({
+      where: { code },
+      include: {
+        booking: {
+          include: {
+            facility: true,
+            user: {
+              select: { name: true, email: true, role: true, nim: true, organization: true }
+            }
+          }
+        }
+      }
+    })
+
+    if (!qr) {
+      return { error: 'QR Code tidak terdaftar di sistem.' }
+    }
+
+    if (!qr.isValid) {
+      return { error: 'QR Code sudah tidak valid atau telah dinonaktifkan.' }
+    }
+
+    if (qr.scannedAt) {
+      const scannedUser = await prisma.user.findUnique({
+        where: { id: qr.scannedById || '' },
+        select: { name: true }
+      })
+      return { 
+        error: `QR Code ini sudah pernah digunakan untuk check-in pada ${new Date(qr.scannedAt).toLocaleString('id-ID')} oleh ${scannedUser?.name || 'Admin'}.` 
+      }
+    }
+
+    // Mark as scanned
+    await prisma.qRVerification.update({
+      where: { id: qr.id },
+      data: {
+        scannedAt: new Date(),
+        scannedById: session.user.id,
+      }
+    })
+
+    // Also update booking status to ACTIVE
+    await prisma.booking.update({
+      where: { id: qr.bookingId },
+      data: { status: 'ACTIVE' }
+    })
+
+    // Revalidate paths
+    revalidatePath('/admin/bookings')
+    revalidatePath('/dashboard')
+
+    return { 
+      success: true, 
+      booking: qr.booking 
+    }
+  } catch (error) {
+    console.error('Verify QR error:', error)
+    return { error: 'Terjadi kesalahan sistem saat memverifikasi QR Code.' }
+  }
+}
+
+// Get QR Code details for verification page (admin)
+export async function getQRDetails(code: string) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return { error: 'Akses ditolak. Hanya admin yang dapat melihat detail QR Code.' }
+  }
+
+  try {
+    const qr = await prisma.qRVerification.findUnique({
+      where: { code },
+      include: {
+        booking: {
+          include: {
+            facility: true,
+            user: {
+              select: { name: true, email: true, role: true, nim: true, phone: true, organization: true }
+            }
+          }
+        }
+      }
+    })
+
+    if (!qr) {
+      return { error: 'QR Code tidak terdaftar di sistem.' }
+    }
+
+    let scannedByName = null
+    if (qr.scannedById) {
+      const scannedUser = await prisma.user.findUnique({
+        where: { id: qr.scannedById },
+        select: { name: true }
+      })
+      scannedByName = scannedUser?.name || 'Admin'
+    }
+
+    return {
+      success: true,
+      qr: {
+        id: qr.id,
+        code: qr.code,
+        scannedAt: qr.scannedAt ? qr.scannedAt.toISOString() : null,
+        scannedByName,
+        isValid: qr.isValid,
+        createdAt: qr.createdAt.toISOString(),
+      },
+      booking: {
+        ...qr.booking,
+        startTime: qr.booking.startTime.toISOString(),
+        endTime: qr.booking.endTime.toISOString(),
+        createdAt: qr.booking.createdAt.toISOString(),
+        updatedAt: qr.booking.updatedAt.toISOString(),
+      },
+    }
+  } catch (error) {
+    console.error('Get QR Details error:', error)
+    return { error: 'Terjadi kesalahan sistem saat mengambil detail QR Code.' }
+  }
+}
+
+

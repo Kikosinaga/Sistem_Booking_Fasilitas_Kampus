@@ -567,3 +567,272 @@
   cursor: not-allowed;
   transform: none;
 }
+
+/* QR Button and Modal Styles */
+.qrBtn {
+  font-size: 0.688rem;
+  font-weight: 600;
+  color: var(--success-700);
+  background: var(--success-50);
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: 1px solid var(--success-200);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.qrBtn:hover {
+  background: var(--success-100);
+  border-color: var(--success-300);
+  transform: translateY(-1px);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.qrModal {
+  background: white;
+  width: 90%;
+  max-width: 440px;
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--neutral-100);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+.modalTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modalTitleIcon {
+  color: var(--primary-600);
+}
+
+.modalTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 9999px;
+  transition: all 0.2s;
+}
+
+.modalCloseBtn:hover {
+  background: var(--neutral-100);
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.modalDesc {
+  font-size: 0.813rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.qrWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--neutral-50);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px dashed var(--neutral-300);
+  margin-bottom: 1.25rem;
+}
+
+.qrCodeImage {
+  background: white;
+  padding: 10px;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.qrPlaceholder {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 0.75rem;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.qrCodeText {
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+  letter-spacing: 0.05em;
+  background: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--neutral-200);
+}
+
+.badgeValid {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.688rem;
+  font-weight: 700;
+  color: white;
+  background: var(--success-600);
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  margin-top: 1rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
+}
+
+.bookingDetailBox {
+  background: white;
+  border: 1px solid var(--neutral-200);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.detailBoxTitle {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 0.938rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--neutral-100);
+  padding-bottom: 0.5rem;
+}
+
+.detailRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.detailRow:last-child {
+  margin-bottom: 0;
+}
+
+.detailIcon {
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.detailLabel {
+  font-size: 0.688rem;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.detailValue {
+  font-size: 0.813rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.warningAlert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: var(--warning-50);
+  border: 1px solid var(--warning-200);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  color: var(--warning-800);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.alertIcon {
+  color: var(--warning-600);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--neutral-100);
+  display: flex;
+  justify-content: flex-end;
+  background: var(--neutral-50);
+}
+
+.modalCloseMainBtn {
+  background: var(--text-primary);
+  color: white;
+  border: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modalCloseMainBtn:hover {
+  background: var(--text-secondary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
