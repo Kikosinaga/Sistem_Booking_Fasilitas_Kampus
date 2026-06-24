@@ -6,6 +6,7 @@ import { signOut } from '@/lib/auth'
 import Link from 'next/link'
 import styles from './dashboard.module.css'
 import PayButton from './PayButton'
+import NotificationBell from './NotificationBell'
 import { formatDate, formatTime, getBookingStatusLabel, getBookingStatusColor, formatCurrency } from '@/lib/utils'
 import { 
   Bell, ClipboardList, Hourglass, CheckCircle, Flag, Calendar, 
@@ -60,10 +61,7 @@ export default async function DashboardPage() {
             <Link href="/facilities" className={styles.topNavLink}>Fasilitas</Link>
           </div>
           <div className={styles.topNavActions}>
-            <div className={styles.notifBadge} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Bell size={20} />
-              {unreadCount > 0 && <span className={styles.notifCount}>{unreadCount}</span>}
-            </div>
+            <NotificationBell initialUnreadCount={unreadCount} />
             <div className={styles.userMenuArea}>
               <div className={styles.userAvatar}>
                 {session.user.name?.charAt(0).toUpperCase()}
@@ -327,7 +325,7 @@ export default async function DashboardPage() {
 
           {/* Recent Notifications */}
           {notifications.length > 0 && (
-            <section className={styles.section}>
+            <section id="notifications" className={styles.section}>
               <h2 className={styles.sectionTitle}>Notifikasi Terbaru</h2>
               <div className={styles.notifList}>
                 {notifications.slice(0, 5).map((notif: any) => (
