@@ -136,8 +136,12 @@ export default async function AdminDashboardPage() {
                           </div>
                         </div>
                         <div className={styles.bookingItemRight}>
-                          <span className={`${styles.bookingItemStatus} ${styles[`status${booking.isFree && booking.status === 'PAID' ? 'APPROVED' : booking.status}`]}`}>
-                            {booking.isFree && booking.status === 'PAID' ? 'Disetujui' : getBookingStatusLabel(booking.status)}
+                          <span className={`${styles.bookingItemStatus} ${
+                            booking.isFree && ['APPROVED', 'PAID'].includes(booking.status)
+                              ? styles.statusPAID
+                              : styles[`status${booking.status}`]
+                          }`}>
+                            {booking.isFree && ['APPROVED', 'PAID'].includes(booking.status) ? 'Disetujui' : getBookingStatusLabel(booking.status)}
                           </span>
                           <span className={styles.bookingItemDate}>
                             {formatDate(booking.createdAt, { day: 'numeric', month: 'short' })}

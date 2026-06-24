@@ -159,19 +159,24 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className={styles.bookingGrid}>
-                {activeBookings.map((booking: any) => (
-                  <div key={booking.id} className={styles.bookingCard}>
-                    <div className={styles.bookingCardHeader}>
-                      <span className={`${styles.bookingStatus} ${styles[`status${booking.isFree && booking.status === 'PAID' ? 'APPROVED' : booking.status}`]}`}>
-                        {booking.isFree && booking.status === 'PAID' ? 'Disetujui' : getBookingStatusLabel(booking.status)}
-                      </span>
-                      {booking.qrVerification && (
-                        <span className={styles.qrBadge} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <QrCode size={12} />
-                          <span>QR Ready</span>
+                {activeBookings.map((booking: any) => {
+                  const isApprovedOrPaidFree = booking.isFree && ['APPROVED', 'PAID'].includes(booking.status);
+                  const badgeClass = isApprovedOrPaidFree ? styles.statusPAID : styles[`status${booking.status}`];
+                  const badgeText = isApprovedOrPaidFree ? 'DISETUJUI' : getBookingStatusLabel(booking.status);
+
+                  return (
+                    <div key={booking.id} className={styles.bookingCard}>
+                      <div className={styles.bookingCardHeader}>
+                        <span className={`${styles.bookingStatus} ${badgeClass}`}>
+                          {badgeText}
                         </span>
-                      )}
-                    </div>
+                        {booking.qrVerification && !booking.isFree && (
+                          <span className={styles.qrBadge} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <QrCode size={12} />
+                            <span>QR Ready</span>
+                          </span>
+                        )}
+                      </div>
                     <h3 className={styles.bookingTitle}>{booking.title}</h3>
                     <p className={styles.bookingFacility} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <FacilityIcon type={booking.facility.type || booking.facility.facilityType} size={14} style={{ color: 'var(--text-secondary)' }} />
@@ -276,7 +281,8 @@ export default async function DashboardPage() {
                       </div>
                     )}
                   </div>
-                ))}
+                );
+              })}
               </div>
             )}
           </section>
@@ -289,13 +295,18 @@ export default async function DashboardPage() {
                 <span className={styles.sectionCount}>{completedBookings.length}</span>
               </h2>
               <div className={styles.bookingGrid}>
-                {completedBookings.slice(0, 6).map((booking: any) => (
-                  <div key={booking.id} className={`${styles.bookingCard} ${styles.bookingCardFaded}`}>
-                    <div className={styles.bookingCardHeader}>
-                      <span className={`${styles.bookingStatus} ${styles[`status${booking.isFree && booking.status === 'PAID' ? 'APPROVED' : booking.status}`]}`}>
-                        {booking.isFree && booking.status === 'PAID' ? 'Disetujui' : getBookingStatusLabel(booking.status)}
-                      </span>
-                    </div>
+                {completedBookings.slice(0, 6).map((booking: any) => {
+                  const isApprovedOrPaidFree = booking.isFree && ['APPROVED', 'PAID'].includes(booking.status);
+                  const badgeClass = isApprovedOrPaidFree ? styles.statusPAID : styles[`status${booking.status}`];
+                  const badgeText = isApprovedOrPaidFree ? 'DISETUJUI' : getBookingStatusLabel(booking.status);
+
+                  return (
+                    <div key={booking.id} className={`${styles.bookingCard} ${styles.bookingCardFaded}`}>
+                      <div className={styles.bookingCardHeader}>
+                        <span className={`${styles.bookingStatus} ${badgeClass}`}>
+                          {badgeText}
+                        </span>
+                      </div>
                     <h3 className={styles.bookingTitle}>{booking.title}</h3>
                     <p className={styles.bookingFacility} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <FacilityIcon type={booking.facility.type || booking.facility.facilityType} size={14} style={{ color: 'var(--text-secondary)' }} />
@@ -307,8 +318,9 @@ export default async function DashboardPage() {
                         <span>{formatDate(booking.startTime)}</span>
                       </span>
                     </div>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}

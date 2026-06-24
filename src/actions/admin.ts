@@ -110,23 +110,13 @@ export async function approveBooking(bookingId: string, note?: string) {
       })
     }
 
-    // Generate QR code for free bookings
-    if (isFree) {
-      await tx.qRVerification.create({
-        data: {
-          bookingId,
-          code: `BK-${bookingId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
-        },
-      })
-    }
-
     // Notify user
     await tx.notification.create({
       data: {
         userId: booking.userId,
         title: 'Booking Disetujui',
         message: `Booking "${booking.title}" untuk ${booking.facility.name} telah disetujui.${
-          isFree ? ' Anda dapat melihat QR Code di halaman booking.' : ' Silakan lakukan pembayaran.'
+          isFree ? '' : ' Silakan lakukan pembayaran.'
         }`,
         type: 'BOOKING_APPROVED',
         bookingId,

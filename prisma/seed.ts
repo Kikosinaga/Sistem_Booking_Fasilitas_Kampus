@@ -325,14 +325,7 @@ async function main() {
 
   console.log('✅ Sample bookings created')
 
-  // Create QR verification for approved booking
-  await prisma.qRVerification.create({
-    data: {
-      bookingId: booking1.id,
-      code: `BK-${booking1.id.slice(0, 8).toUpperCase()}`,
-    },
-  })
-  console.log('✅ QR verification created')
+
 
   // Create notifications
   await prisma.notification.createMany({

@@ -198,8 +198,12 @@ export default async function AdminBookingsPage() {
                           </div>
                         </td>
                         <td>
-                          <span className={`${bookingStyles.statusBadge} ${bookingStyles[`status${booking.isFree && booking.status === 'PAID' ? 'APPROVED' : booking.status}`]}`}>
-                            {booking.isFree && booking.status === 'PAID' ? 'Disetujui' : getBookingStatusLabel(booking.status)}
+                          <span className={`${bookingStyles.statusBadge} ${
+                            booking.isFree && ['APPROVED', 'PAID'].includes(booking.status)
+                              ? bookingStyles.statusPAID
+                              : bookingStyles[`status${booking.status}`]
+                          }`}>
+                            {booking.isFree && ['APPROVED', 'PAID'].includes(booking.status) ? 'Disetujui' : getBookingStatusLabel(booking.status)}
                           </span>
                         </td>
                         <td>
