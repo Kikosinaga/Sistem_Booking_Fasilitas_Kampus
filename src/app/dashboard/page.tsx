@@ -162,8 +162,8 @@ export default async function DashboardPage() {
                 {activeBookings.map((booking: any) => (
                   <div key={booking.id} className={styles.bookingCard}>
                     <div className={styles.bookingCardHeader}>
-                      <span className={`${styles.bookingStatus} ${styles[`status${booking.status}`]}`}>
-                        {getBookingStatusLabel(booking.status)}
+                      <span className={`${styles.bookingStatus} ${styles[`status${booking.isFree && booking.status === 'PAID' ? 'APPROVED' : booking.status}`]}`}>
+                        {booking.isFree && booking.status === 'PAID' ? 'Disetujui' : getBookingStatusLabel(booking.status)}
                       </span>
                       {booking.qrVerification && (
                         <span className={styles.qrBadge} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -292,8 +292,8 @@ export default async function DashboardPage() {
                 {completedBookings.slice(0, 6).map((booking: any) => (
                   <div key={booking.id} className={`${styles.bookingCard} ${styles.bookingCardFaded}`}>
                     <div className={styles.bookingCardHeader}>
-                      <span className={`${styles.bookingStatus} ${styles[`status${booking.status}`]}`}>
-                        {getBookingStatusLabel(booking.status)}
+                      <span className={`${styles.bookingStatus} ${styles[`status${booking.isFree && booking.status === 'PAID' ? 'APPROVED' : booking.status}`]}`}>
+                        {booking.isFree && booking.status === 'PAID' ? 'Disetujui' : getBookingStatusLabel(booking.status)}
                       </span>
                     </div>
                     <h3 className={styles.bookingTitle}>{booking.title}</h3>

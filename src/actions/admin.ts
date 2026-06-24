@@ -89,7 +89,7 @@ export async function approveBooking(bookingId: string, note?: string) {
     await tx.booking.update({
       where: { id: bookingId },
       data: {
-        status: isFree ? 'PAID' : 'APPROVED',
+        status: 'APPROVED',
         adminNote: note,
         paymentStatus: isFree ? 'PAID' : 'UNPAID',
       },
