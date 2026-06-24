@@ -7,6 +7,26 @@ import Link from 'next/link'
 import styles from './dashboard.module.css'
 import PayButton from './PayButton'
 import { formatDate, formatTime, getBookingStatusLabel, getBookingStatusColor, formatCurrency } from '@/lib/utils'
+import { 
+  Bell, ClipboardList, Hourglass, CheckCircle, Flag, Calendar, 
+  Smartphone, Landmark, Trophy, Building, School, Activity, Coins, 
+  Clock, GraduationCap, Contact, FileText, Receipt, QrCode, XCircle
+} from 'lucide-react'
+
+function FacilityIcon({ type, size = 16, className, style }: { type: string, size?: number, className?: string, style?: React.CSSProperties }) {
+  switch (type?.toUpperCase()) {
+    case 'AULA':
+      return <Landmark size={size} className={className} style={style} />
+    case 'GOR':
+      return <Trophy size={size} className={className} style={style} />
+    case 'LAPANGAN':
+      return <Activity size={size} className={className} style={style} />
+    case 'GEDUNG':
+      return <Building size={size} className={className} style={style} />
+    default:
+      return <School size={size} className={className} style={style} />
+  }
+}
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -40,8 +60,8 @@ export default async function DashboardPage() {
             <Link href="/facilities" className={styles.topNavLink}>Fasilitas</Link>
           </div>
           <div className={styles.topNavActions}>
-            <div className={styles.notifBadge}>
-              🔔
+            <div className={styles.notifBadge} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Bell size={20} />
               {unreadCount > 0 && <span className={styles.notifCount}>{unreadCount}</span>}
             </div>
             <div className={styles.userMenuArea}>
@@ -66,7 +86,7 @@ export default async function DashboardPage() {
           {/* Welcome */}
           <div className={styles.welcomeSection}>
             <div>
-              <h1 className={styles.welcomeTitle}>Halo, {session.user.name}! 👋</h1>
+              <h1 className={styles.welcomeTitle}>Halo, {session.user.name}!</h1>
               <p className={styles.welcomeSubtitle}>Kelola booking fasilitas kampus Anda di sini</p>
             </div>
             <Link href="/facilities" className={styles.newBookingBtn}>
@@ -77,14 +97,18 @@ export default async function DashboardPage() {
           {/* Stats */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconBlue}`}>📋</div>
+              <div className={`${styles.statIcon} ${styles.statIconBlue}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ClipboardList size={22} />
+              </div>
               <div>
                 <div className={styles.statValue}>{bookings.length}</div>
                 <div className={styles.statLabel}>Total Booking</div>
               </div>
             </div>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconYellow}`}>⏳</div>
+              <div className={`${styles.statIcon} ${styles.statIconYellow}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Hourglass size={22} />
+              </div>
               <div>
                 <div className={styles.statValue}>
                   {bookings.filter((b: any) => b.status === 'PENDING').length}
@@ -93,7 +117,9 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconGreen}`}>✅</div>
+              <div className={`${styles.statIcon} ${styles.statIconGreen}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle size={22} />
+              </div>
               <div>
                 <div className={styles.statValue}>
                   {bookings.filter((b: any) => ['APPROVED', 'PAID', 'ACTIVE'].includes(b.status)).length}
@@ -102,7 +128,9 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconPurple}`}>🏁</div>
+              <div className={`${styles.statIcon} ${styles.statIconPurple}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Flag size={22} />
+              </div>
               <div>
                 <div className={styles.statValue}>
                   {bookings.filter((b: any) => b.status === 'COMPLETED').length}
@@ -120,7 +148,9 @@ export default async function DashboardPage() {
             </h2>
             {activeBookings.length === 0 ? (
               <div className={styles.emptyState}>
-                <div className={styles.emptyIcon}>📅</div>
+                <div className={styles.emptyIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+                  <Calendar size={48} />
+                </div>
                 <h3>Belum ada booking aktif</h3>
                 <p>Mulai booking fasilitas kampus sekarang</p>
                 <Link href="/facilities" className={styles.emptyBtn}>
@@ -136,20 +166,45 @@ export default async function DashboardPage() {
                         {getBookingStatusLabel(booking.status)}
                       </span>
                       {booking.qrVerification && (
-                        <span className={styles.qrBadge}>📱 QR Ready</span>
+                        <span className={styles.qrBadge} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <QrCode size={12} />
+                          <span>QR Ready</span>
+                        </span>
                       )}
                     </div>
                     <h3 className={styles.bookingTitle}>{booking.title}</h3>
-                    <p className={styles.bookingFacility}>🏛️ {booking.facility.name}</p>
+                    <p className={styles.bookingFacility} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <FacilityIcon type={booking.facility.type || booking.facility.facilityType} size={14} style={{ color: 'var(--text-secondary)' }} />
+                      <span>{booking.facility.name}</span>
+                    </p>
                     <div className={styles.bookingMeta}>
-                      <span>📅 {formatDate(booking.startTime)}</span>
-                      <span>🕐 {formatTime(booking.startTime)} - {formatTime(booking.endTime)}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={12} />
+                        <span>{formatDate(booking.startTime)}</span>
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Clock size={12} />
+                        <span>{formatTime(booking.startTime)} - {formatTime(booking.endTime)}</span>
+                      </span>
                     </div>
                     {booking.totalPrice > 0 && (
                       <div className={styles.bookingPrice}>
-                        💰 {formatCurrency(booking.totalPrice)}
-                        <span className={styles.paymentStatus}>
-                          {booking.paymentStatus === 'PAID' ? '✅ Lunas' : '⏳ Belum bayar'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Coins size={14} style={{ color: 'var(--primary-600)' }} />
+                          <span>{formatCurrency(booking.totalPrice)}</span>
+                        </div>
+                        <span className={styles.paymentStatus} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {booking.paymentStatus === 'PAID' ? (
+                            <>
+                              <CheckCircle size={12} style={{ color: 'var(--success-color)' }} />
+                              <span>Lunas</span>
+                            </>
+                          ) : (
+                            <>
+                              <Hourglass size={12} style={{ color: 'var(--warning-color)' }} />
+                              <span>Belum bayar</span>
+                            </>
+                          )}
                         </span>
                         {booking.status === 'APPROVED' && booking.paymentStatus !== 'PAID' && (
                           <PayButton bookingId={booking.id} />
@@ -157,7 +212,10 @@ export default async function DashboardPage() {
                       </div>
                     )}
                     {booking.isFree && (
-                      <div className={styles.bookingFree}>🎓 Gratis (Mahasiswa/Dosen)</div>
+                      <div className={styles.bookingFree} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <GraduationCap size={14} />
+                        <span>Gratis (Mahasiswa/Dosen)</span>
+                      </div>
                     )}
                     {booking.documents && booking.documents.length > 0 && (
                       <div className={styles.bookingDocs}>
@@ -168,18 +226,51 @@ export default async function DashboardPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className={styles.bookingDocBadge}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           >
-                            {doc.documentType === 'KTM' ? '🪪 KTM' :
-                              doc.documentType === 'PROPOSAL' ? '📋 Proposal' :
-                                doc.documentType === 'PAYMENT_PROOF' ? '🧾 Bukti Bayar' :
-                                  `📄 ${doc.fileName}`}
+                            {doc.documentType === 'KTM' ? (
+                              <>
+                                <Contact size={12} />
+                                <span>KTM</span>
+                              </>
+                            ) : doc.documentType === 'PROPOSAL' ? (
+                              <>
+                                <ClipboardList size={12} />
+                                <span>Proposal</span>
+                              </>
+                            ) : doc.documentType === 'PAYMENT_PROOF' ? (
+                              <>
+                                <Receipt size={12} />
+                                <span>Bukti Bayar</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText size={12} />
+                                <span>{doc.fileName.slice(0, 10)}...</span>
+                              </>
+                            )}
                           </a>
                         ))}
                         {booking.paymentMethod && booking.paymentMethod !== 'FREE' && (
-                          <span className={styles.bookingPaymentMethod}>
-                            {booking.paymentMethod === 'BANK_TRANSFER' ? '🏦 Transfer Bank' :
-                              booking.paymentMethod === 'QRIS' ? '📱 QRIS' :
-                                booking.paymentMethod === 'EWALLET' ? '💰 E-Wallet' : booking.paymentMethod}
+                          <span className={styles.bookingPaymentMethod} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            {booking.paymentMethod === 'BANK_TRANSFER' ? (
+                              <>
+                                <Landmark size={12} />
+                                <span>Transfer Bank</span>
+                              </>
+                            ) : booking.paymentMethod === 'QRIS' ? (
+                              <>
+                                <Smartphone size={12} />
+                                <span>QRIS</span>
+                              </>
+                            ) : booking.paymentMethod === 'EWALLET' ? (
+                              <>
+                                <Coins size={12} />
+                                <span>E-Wallet</span>
+                              </>
+                            ) : (
+                              <span>{booking.paymentMethod}</span>
+                            )}
                           </span>
                         )}
                       </div>
@@ -206,9 +297,15 @@ export default async function DashboardPage() {
                       </span>
                     </div>
                     <h3 className={styles.bookingTitle}>{booking.title}</h3>
-                    <p className={styles.bookingFacility}>🏛️ {booking.facility.name}</p>
+                    <p className={styles.bookingFacility} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <FacilityIcon type={booking.facility.type || booking.facility.facilityType} size={14} style={{ color: 'var(--text-secondary)' }} />
+                      <span>{booking.facility.name}</span>
+                    </p>
                     <div className={styles.bookingMeta}>
-                      <span>📅 {formatDate(booking.startTime)}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={12} />
+                        <span>{formatDate(booking.startTime)}</span>
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -226,11 +323,12 @@ export default async function DashboardPage() {
                     key={notif.id}
                     className={`${styles.notifItem} ${!notif.isRead ? styles.notifUnread : ''}`}
                   >
-                    <div className={styles.notifIcon}>
-                      {notif.type === 'BOOKING_APPROVED' ? '✅' :
-                        notif.type === 'BOOKING_REJECTED' ? '❌' :
-                          notif.type === 'BOOKING_SUBMITTED' ? '📋' :
-                            notif.type === 'PAYMENT_RECEIVED' ? '💰' : '🔔'}
+                    <div className={styles.notifIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {notif.type === 'BOOKING_APPROVED' ? <CheckCircle size={18} style={{ color: 'var(--success-color)' }} /> :
+                        notif.type === 'BOOKING_REJECTED' ? <XCircle size={18} style={{ color: 'var(--error-color)' }} /> :
+                          notif.type === 'BOOKING_SUBMITTED' ? <ClipboardList size={18} style={{ color: 'var(--primary-600)' }} /> :
+                            notif.type === 'PAYMENT_RECEIVED' ? <Coins size={18} style={{ color: 'var(--primary-600)' }} /> : 
+                              <Bell size={18} style={{ color: 'var(--text-secondary)' }} />}
                     </div>
                     <div className={styles.notifContent}>
                       <p className={styles.notifTitle}>{notif.title}</p>

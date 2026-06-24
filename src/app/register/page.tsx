@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { registerUser } from '@/actions/auth'
 import styles from '../login/auth.module.css'
+import { GraduationCap, Award, Building2 } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -80,9 +81,9 @@ export default function RegisterPage() {
               <label className={styles.formLabel}>Daftar Sebagai</label>
               <div className={styles.roleSelector}>
                 {[
-                  { value: 'MAHASISWA', label: '🎓 Mahasiswa', desc: 'Booking gratis' },
-                  { value: 'DOSEN', label: '👨‍🏫 Dosen', desc: 'Booking gratis' },
-                  { value: 'EKSTERNAL', label: '🏢 Eksternal', desc: 'Berbayar' },
+                  { value: 'MAHASISWA', label: 'Mahasiswa', icon: GraduationCap, desc: 'Booking gratis' },
+                  { value: 'DOSEN', label: 'Dosen', icon: Award, desc: 'Booking gratis' },
+                  { value: 'EKSTERNAL', label: 'Eksternal', icon: Building2, desc: 'Berbayar' },
                 ].map((r) => (
                   <button
                     key={r.value}
@@ -90,7 +91,10 @@ export default function RegisterPage() {
                     onClick={() => setRole(r.value)}
                     className={`${styles.roleOption} ${role === r.value ? styles.roleOptionActive : ''}`}
                   >
-                    <span className={styles.roleLabel}>{r.label}</span>
+                    <span className={styles.roleLabel} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <r.icon size={18} />
+                      {r.label}
+                    </span>
                     <span className={styles.roleDesc}>{r.desc}</span>
                   </button>
                 ))}

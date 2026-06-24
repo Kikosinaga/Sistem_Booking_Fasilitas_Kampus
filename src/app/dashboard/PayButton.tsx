@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Script from 'next/script'
 import styles from './dashboard.module.css'
 import { getOrCreateSnapToken } from '@/actions/booking'
+import { CreditCard } from 'lucide-react'
 
 interface PayButtonProps {
   bookingId: string
@@ -63,7 +64,12 @@ export default function PayButton({ bookingId }: PayButtonProps) {
         strategy="afterInteractive"
       />
       <button onClick={handlePay} disabled={loading} className={styles.payBtn}>
-        {loading ? 'Memproses...' : '💳 Bayar Sekarang'}
+        {loading ? 'Memproses...' : (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+            <CreditCard size={16} />
+            <span>Bayar Sekarang</span>
+          </span>
+        )}
       </button>
     </>
   )

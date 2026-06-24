@@ -5,6 +5,24 @@ import Link from 'next/link'
 import { formatCurrency, getFacilityTypeLabel } from '@/lib/utils'
 import BookingForm from './BookingForm'
 import styles from './detail.module.css'
+import { 
+  MapPin, Users, Clock, Coins, Landmark, Trophy, Building, School, Activity 
+} from 'lucide-react'
+
+function FacilityIcon({ type, size = 24, className, style }: { type: string, size?: number, className?: string, style?: React.CSSProperties }) {
+  switch (type?.toUpperCase()) {
+    case 'AULA':
+      return <Landmark size={size} className={className} style={style} />
+    case 'GOR':
+      return <Trophy size={size} className={className} style={style} />
+    case 'LAPANGAN':
+      return <Activity size={size} className={className} style={style} />
+    case 'GEDUNG':
+      return <Building size={size} className={className} style={style} />
+    default:
+      return <School size={size} className={className} style={style} />
+  }
+}
 
 export default async function FacilityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -41,10 +59,8 @@ export default async function FacilityDetailPage({ params }: { params: Promise<{
             className={styles.heroImage}
           />
         ) : (
-          <div className={styles.heroEmoji}>
-            {facility.type === 'AULA' ? '🏛️' :
-             facility.type === 'GOR' ? '🏐' :
-             facility.type === 'LAPANGAN' ? '⚽' : '🏢'}
+          <div className={styles.heroEmoji} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-600)' }}>
+            <FacilityIcon type={facility.type} size={80} />
           </div>
         )}
       </section>
@@ -57,25 +73,34 @@ export default async function FacilityDetailPage({ params }: { params: Promise<{
             <div className={styles.infoColumn}>
               <div className={styles.typeBadge}>{getFacilityTypeLabel(facility.type)}</div>
               <h1 className={styles.title}>{facility.name}</h1>
-              <p className={styles.location}>📍 {facility.location}</p>
+              <p className={styles.location} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={16} style={{ color: 'var(--text-tertiary)' }} />
+                {facility.location}
+              </p>
 
               <div className={styles.metaGrid}>
                 <div className={styles.metaItem}>
-                  <span className={styles.metaIcon}>👥</span>
+                  <span className={styles.metaIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Users size={20} style={{ color: 'var(--primary-600)' }} />
+                  </span>
                   <div>
                     <span className={styles.metaValue}>{facility.capacity}</span>
                     <span className={styles.metaLabel}>Kapasitas</span>
                   </div>
                 </div>
                 <div className={styles.metaItem}>
-                  <span className={styles.metaIcon}>🕐</span>
+                  <span className={styles.metaIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock size={20} style={{ color: 'var(--primary-600)' }} />
+                  </span>
                   <div>
                     <span className={styles.metaValue}>{facility.openTime} - {facility.closeTime}</span>
                     <span className={styles.metaLabel}>Jam Operasional</span>
                   </div>
                 </div>
                 <div className={styles.metaItem}>
-                  <span className={styles.metaIcon}>💰</span>
+                  <span className={styles.metaIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Coins size={20} style={{ color: 'var(--primary-600)' }} />
+                  </span>
                   <div>
                     <span className={styles.metaValue}>
                       {facility.pricePerHour > 0

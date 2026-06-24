@@ -1,6 +1,26 @@
 import Link from 'next/link'
 import { getFacilities } from '@/actions/booking'
 import styles from './page.module.css'
+import { 
+  MapPin, Users, KeyRound, Calendar, CheckCircle, Smartphone, 
+  RefreshCw, CreditCard, Bell, BarChart3, GraduationCap, Mail, Phone,
+  Building, Landmark, Trophy, School, Activity
+} from 'lucide-react'
+
+function FacilityIcon({ type, size = 24, className, style }: { type: string, size?: number, className?: string, style?: React.CSSProperties }) {
+  switch (type?.toUpperCase()) {
+    case 'AULA':
+      return <Landmark size={size} className={className} style={style} />
+    case 'GOR':
+      return <Trophy size={size} className={className} style={style} />
+    case 'LAPANGAN':
+      return <Activity size={size} className={className} style={style} />
+    case 'GEDUNG':
+      return <Building size={size} className={className} style={style} />
+    default:
+      return <School size={size} className={className} style={style} />
+  }
+}
 
 export default async function HomePage() {
   let facilities: any[] = []
@@ -105,25 +125,34 @@ export default async function HomePage() {
                       className={styles.facilityImageReal}
                     />
                   ) : (
-                    <div className={styles.facilityImage}>
-                      {getFacilityEmoji(facility.type || facility.facilityType)}
+                    <div className={styles.facilityImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-600)' }}>
+                      <FacilityIcon type={facility.type || facility.facilityType} size={48} />
                     </div>
                   )}
-                  <div className={styles.facilityBadge}>
-                    {facility.type === 'AULA' || facility.facilityType === 'AULA'
-                      ? '🏛️ Aula'
-                      : facility.type === 'GOR' || facility.facilityType === 'GOR'
-                        ? '🏐 GOR'
-                        : facility.type === 'LAPANGAN' || facility.facilityType === 'LAPANGAN'
-                          ? '⚽ Lapangan'
-                          : '🏢 Gedung'}
+                  <div className={styles.facilityBadge} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <FacilityIcon type={facility.type || facility.facilityType} size={14} />
+                    <span>
+                      {facility.type === 'AULA' || facility.facilityType === 'AULA'
+                        ? 'Aula'
+                        : facility.type === 'GOR' || facility.facilityType === 'GOR'
+                          ? 'GOR'
+                          : facility.type === 'LAPANGAN' || facility.facilityType === 'LAPANGAN'
+                            ? 'Lapangan'
+                            : 'Gedung'}
+                    </span>
                   </div>
                 </div>
                 <div className={styles.facilityBody}>
                   <h3 className={styles.facilityName}>{facility.name}</h3>
-                  <p className={styles.facilityLocation}>📍 {facility.location}</p>
+                  <p className={styles.facilityLocation} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={14} style={{ color: 'var(--text-tertiary)' }} />
+                    {facility.location}
+                  </p>
                   <div className={styles.facilityMeta}>
-                    <span className={styles.facilityCapacity}>👥 {facility.capacity} orang</span>
+                    <span className={styles.facilityCapacity} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Users size={14} style={{ color: 'var(--text-secondary)' }} />
+                      {facility.capacity} orang
+                    </span>
                     <span className={styles.facilityPrice}>
                       {facility.pricePerHour > 0
                         ? `Rp ${(facility.pricePerHour).toLocaleString('id-ID')}/jam`
@@ -159,32 +188,34 @@ export default async function HomePage() {
             {[
               {
                 step: '01',
-                icon: '🔐',
+                icon: KeyRound,
                 title: 'Daftar & Login',
                 desc: 'Buat akun dengan email kampus atau sebagai pihak eksternal',
               },
               {
                 step: '02',
-                icon: '📅',
+                icon: Calendar,
                 title: 'Pilih & Cek Jadwal',
                 desc: 'Pilih fasilitas, lihat kalender ketersediaan, dan tentukan waktu',
               },
               {
                 step: '03',
-                icon: '✅',
+                icon: CheckCircle,
                 title: 'Submit & Tunggu',
                 desc: 'Ajukan booking dan tunggu persetujuan admin kampus',
               },
               {
                 step: '04',
-                icon: '📱',
+                icon: Smartphone,
                 title: 'QR Code & Gunakan',
                 desc: 'Terima QR Code verifikasi dan gunakan fasilitas sesuai jadwal',
               },
             ].map((item) => (
               <div key={item.step} className={styles.stepCard}>
                 <div className={styles.stepNumber}>{item.step}</div>
-                <div className={styles.stepIcon}>{item.icon}</div>
+                <div className={styles.stepIcon} style={{ display: 'flex', justifyContent: 'center', color: 'var(--primary-600)' }}>
+                  <item.icon size={36} />
+                </div>
                 <h3 className={styles.stepTitle}>{item.title}</h3>
                 <p className={styles.stepDesc}>{item.desc}</p>
               </div>
@@ -202,15 +233,17 @@ export default async function HomePage() {
           </div>
           <div className={styles.featuresGrid}>
             {[
-              { icon: '🔄', title: 'Deteksi Bentrok Otomatis', desc: 'Sistem otomatis mendeteksi jadwal yang bertabrakan' },
-              { icon: '💳', title: 'Pembayaran Online', desc: 'Bayar via QRIS, bank transfer, dan e-wallet' },
-              { icon: '📱', title: 'QR Code Verifikasi', desc: 'Verifikasi penggunaan fasilitas dengan scan QR' },
-              { icon: '🔔', title: 'Reminder Otomatis', desc: 'Notifikasi sebelum jadwal kegiatan berlangsung' },
-              { icon: '📊', title: 'Laporan Lengkap', desc: 'Dashboard statistik dan laporan penggunaan' },
-              { icon: '🎓', title: 'Gratis Mahasiswa', desc: 'Booking gratis untuk seluruh civitas akademika' },
+              { icon: RefreshCw, title: 'Deteksi Bentrok Otomatis', desc: 'Sistem otomatis mendeteksi jadwal yang bertabrakan' },
+              { icon: CreditCard, title: 'Pembayaran Online', desc: 'Bayar via QRIS, bank transfer, dan e-wallet' },
+              { icon: Smartphone, title: 'QR Code Verifikasi', desc: 'Verifikasi penggunaan fasilitas dengan scan QR' },
+              { icon: Bell, title: 'Reminder Otomatis', desc: 'Notifikasi sebelum jadwal kegiatan berlangsung' },
+              { icon: BarChart3, title: 'Laporan Lengkap', desc: 'Dashboard statistik dan laporan penggunaan' },
+              { icon: GraduationCap, title: 'Gratis Mahasiswa', desc: 'Booking gratis untuk seluruh civitas akademika' },
             ].map((feature) => (
               <div key={feature.title} className={styles.featureCard}>
-                <div className={styles.featureIcon}>{feature.icon}</div>
+                <div className={styles.featureIcon} style={{ color: 'var(--primary-600)' }}>
+                  <feature.icon size={28} />
+                </div>
                 <h3 className={styles.featureTitle}>{feature.title}</h3>
                 <p className={styles.featureDesc}>{feature.desc}</p>
               </div>
@@ -259,9 +292,18 @@ export default async function HomePage() {
             </div>
             <div className={styles.footerColumn}>
               <h4>Kontak</h4>
-              <p>📍 Jl. Kampus Raya No. 1</p>
-              <p>📧 booking@kampus.ac.id</p>
-              <p>📞 (021) 123-4567</p>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <MapPin size={16} style={{ color: 'var(--primary-400)' }} />
+                Jl. Kampus Raya No. 1
+              </p>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Mail size={16} style={{ color: 'var(--primary-400)' }} />
+                booking@kampus.ac.id
+              </p>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Phone size={16} style={{ color: 'var(--primary-400)' }} />
+                (021) 123-4567
+              </p>
             </div>
           </div>
         </div>
@@ -273,15 +315,7 @@ export default async function HomePage() {
   )
 }
 
-function getFacilityEmoji(type: string): string {
-  switch (type) {
-    case 'AULA': return '🏛️'
-    case 'GOR': return '🏐'
-    case 'LAPANGAN': return '⚽'
-    case 'GEDUNG': return '🏢'
-    default: return '🏫'
-  }
-}
+
 
 const defaultFacilities = [
   {

@@ -5,6 +5,7 @@ import { signOut } from '@/lib/auth'
 import Link from 'next/link'
 import styles from './admin.module.css'
 import { formatCurrency, formatDate, formatTime, getBookingStatusLabel, getRoleLabel } from '@/lib/utils'
+import { BarChart3, ClipboardList, Building2, Globe, LogOut, Hourglass, Coins, Users } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
   const session = await auth()
@@ -29,27 +30,27 @@ export default async function AdminDashboardPage() {
         <nav className={styles.sidebarNav}>
           <div className={styles.sidebarSection}>
             <span className={styles.sidebarSectionTitle}>Menu Utama</span>
-            <Link href="/admin/dashboard" className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`}>
-              <span>📊</span> Dashboard
+            <Link href="/admin/dashboard" className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={16} /> Dashboard
             </Link>
-            <Link href="/admin/bookings" className={styles.sidebarLink}>
-              <span>📋</span> Booking
+            <Link href="/admin/bookings" className={styles.sidebarLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ClipboardList size={16} /> Booking
               {stats && stats.pendingBookings > 0 && (
                 <span className={styles.sidebarBadge}>{stats.pendingBookings}</span>
               )}
             </Link>
-            <Link href="/admin/facilities" className={styles.sidebarLink}>
-              <span>🏢</span> Fasilitas
+            <Link href="/admin/facilities" className={styles.sidebarLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Building2 size={16} /> Fasilitas
             </Link>
           </div>
           <div className={styles.sidebarSection}>
             <span className={styles.sidebarSectionTitle}>Lainnya</span>
-            <Link href="/" className={styles.sidebarLink}>
-              <span>🌐</span> Lihat Website
+            <Link href="/" className={styles.sidebarLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Globe size={16} /> Lihat Website
             </Link>
             <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }) }}>
-              <button type="submit" className={styles.sidebarLink} style={{ width: '100%' }}>
-                <span>🚪</span> Keluar
+              <button type="submit" className={styles.sidebarLink} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
+                <LogOut size={16} /> Keluar
               </button>
             </form>
           </div>
@@ -69,7 +70,9 @@ export default async function AdminDashboardPage() {
           {/* Stats Grid */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconBlue}`}>📋</div>
+              <div className={`${styles.statIcon} ${styles.statIconBlue}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ClipboardList size={22} />
+              </div>
               <div className={styles.statInfo}>
                 <span className={styles.statValue}>{stats?.totalBookings || 0}</span>
                 <span className={styles.statLabel}>Total Booking</span>
@@ -81,21 +84,27 @@ export default async function AdminDashboardPage() {
               )}
             </div>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconYellow}`}>⏳</div>
+              <div className={`${styles.statIcon} ${styles.statIconYellow}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Hourglass size={22} />
+              </div>
               <div className={styles.statInfo}>
                 <span className={styles.statValue}>{stats?.pendingBookings || 0}</span>
                 <span className={styles.statLabel}>Menunggu Persetujuan</span>
               </div>
             </div>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconGreen}`}>💰</div>
+              <div className={`${styles.statIcon} ${styles.statIconGreen}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Coins size={22} />
+              </div>
               <div className={styles.statInfo}>
                 <span className={styles.statValue}>{formatCurrency(stats?.totalRevenue || 0)}</span>
                 <span className={styles.statLabel}>Total Pendapatan</span>
               </div>
             </div>
             <div className={styles.statCard}>
-              <div className={`${styles.statIcon} ${styles.statIconPurple}`}>👥</div>
+              <div className={`${styles.statIcon} ${styles.statIconPurple}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Users size={22} />
+              </div>
               <div className={styles.statInfo}>
                 <span className={styles.statValue}>{stats?.totalUsers || 0}</span>
                 <span className={styles.statLabel}>Total Pengguna</span>

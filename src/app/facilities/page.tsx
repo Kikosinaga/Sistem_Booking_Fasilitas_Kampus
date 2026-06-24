@@ -4,6 +4,24 @@ import { auth } from '@/lib/auth'
 import { signOut } from '@/lib/auth'
 import { formatCurrency, getFacilityTypeLabel } from '@/lib/utils'
 import styles from './facilities.module.css'
+import { 
+  MapPin, Users, Clock, Construction, Landmark, Trophy, Building, School, Activity 
+} from 'lucide-react'
+
+function FacilityIcon({ type, size = 24, className, style }: { type: string, size?: number, className?: string, style?: React.CSSProperties }) {
+  switch (type?.toUpperCase()) {
+    case 'AULA':
+      return <Landmark size={size} className={className} style={style} />
+    case 'GOR':
+      return <Trophy size={size} className={className} style={style} />
+    case 'LAPANGAN':
+      return <Activity size={size} className={className} style={style} />
+    case 'GEDUNG':
+      return <Building size={size} className={className} style={style} />
+    default:
+      return <School size={size} className={className} style={style} />
+  }
+}
 
 export default async function FacilitiesPage() {
   const session = await auth()
@@ -66,10 +84,8 @@ export default async function FacilitiesPage() {
                       className={styles.facilityImageReal}
                     />
                   ) : (
-                    <span className={styles.facilityEmoji}>
-                      {facility.type === 'AULA' ? '🏛️' :
-                       facility.type === 'GOR' ? '🏐' :
-                       facility.type === 'LAPANGAN' ? '⚽' : '🏢'}
+                    <span className={styles.facilityEmoji} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-600)' }}>
+                      <FacilityIcon type={facility.type} size={48} />
                     </span>
                   )}
                   <div className={styles.facilityType}>
@@ -78,16 +94,21 @@ export default async function FacilitiesPage() {
                 </div>
                 <div className={styles.facilityBody}>
                   <h3 className={styles.facilityName}>{facility.name}</h3>
-                  <p className={styles.facilityLocation}>📍 {facility.location}</p>
+                  <p className={styles.facilityLocation} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={14} style={{ color: 'var(--text-tertiary)' }} />
+                    {facility.location}
+                  </p>
                   <p className={styles.facilityDesc}>
                     {facility.description.slice(0, 100)}...
                   </p>
                   <div className={styles.facilityMeta}>
-                    <div className={styles.facilityMetaItem}>
-                      <span>👥</span> {facility.capacity} orang
+                    <div className={styles.facilityMetaItem} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Users size={14} style={{ color: 'var(--text-secondary)' }} />
+                      <span>{facility.capacity} orang</span>
                     </div>
-                    <div className={styles.facilityMetaItem}>
-                      <span>🕐</span> {facility.openTime} - {facility.closeTime}
+                    <div className={styles.facilityMetaItem} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock size={14} style={{ color: 'var(--text-secondary)' }} />
+                      <span>{facility.openTime} - {facility.closeTime}</span>
                     </div>
                   </div>
                   <div className={styles.facilityFooter}>
@@ -110,7 +131,9 @@ export default async function FacilitiesPage() {
 
           {facilities.length === 0 && (
             <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>🏗️</div>
+              <div className={styles.emptyIcon} style={{ display: 'flex', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+                <Construction size={48} />
+              </div>
               <h3>Fasilitas belum tersedia</h3>
               <p>Database perlu di-seed terlebih dahulu. Jalankan: npx prisma db seed</p>
             </div>

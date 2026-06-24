@@ -6,6 +6,10 @@ import { createBooking, checkBookingConflict } from '@/actions/booking'
 import { formatCurrency } from '@/lib/utils'
 import Script from 'next/script'
 import styles from './detail.module.css'
+import { 
+  FileText, AlertTriangle, CheckCircle, Paperclip, 
+  Contact, ClipboardList, CreditCard, Landmark, Smartphone 
+} from 'lucide-react'
 
 interface BookingFormProps {
   facility: any
@@ -225,7 +229,7 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
   function renderUploadArea(
     label: string,
     description: string,
-    icon: string,
+    IconComponent: any,
     uploadedFile: UploadedFile | null,
     isUploading: boolean,
     inputRef: React.RefObject<HTMLInputElement | null>,
@@ -256,7 +260,9 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
                   className={styles.uploadedThumbnail}
                 />
               ) : (
-                <div className={styles.uploadedFileIcon}>📄</div>
+                <div className={styles.uploadedFileIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-600)' }}>
+                  <FileText size={20} />
+                </div>
               )}
               <div className={styles.uploadedInfo}>
                 <span className={styles.uploadedName}>{uploadedFile.fileName}</span>
@@ -288,7 +294,9 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
               </div>
             ) : (
               <>
-                <div className={styles.uploadIcon}>{icon}</div>
+                <div className={styles.uploadIcon} style={{ display: 'flex', justifyContent: 'center', color: 'var(--primary-500)', marginBottom: '8px' }}>
+                  <IconComponent size={32} />
+                </div>
                 <span className={styles.uploadText}>
                   Klik atau drag file ke sini
                 </span>
@@ -313,14 +321,23 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
   return (
     <form onSubmit={handleSubmit} className={styles.bookingForm}>
       {error && (
-        <div className={styles.alertError}>⚠️ {error}</div>
+        <div className={styles.alertError} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlertTriangle size={16} />
+          <span>{error}</span>
+        </div>
       )}
       {success && (
-        <div className={styles.alertSuccess}>✅ {success}</div>
+        <div className={styles.alertSuccess} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <CheckCircle size={16} />
+          <span>{success}</span>
+        </div>
       )}
       {conflict.length > 0 && (
         <div className={styles.alertConflict}>
-          <strong>⚠️ Jadwal Bentrok!</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <AlertTriangle size={16} style={{ color: 'var(--error-color)' }} />
+            <span>Jadwal Bentrok!</span>
+          </div>
           <p>Terdapat {conflict.length} booking pada waktu yang dipilih:</p>
           {conflict.map((c: any) => (
             <div key={c.id} className={styles.conflictItem}>
@@ -399,7 +416,9 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
       {isMahasiswa && (
         <div className={styles.uploadSection}>
           <div className={styles.uploadSectionHeader}>
-            <span className={styles.uploadSectionIcon}>📎</span>
+            <span className={styles.uploadSectionIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Paperclip size={18} />
+            </span>
             <div>
               <h3 className={styles.uploadSectionTitle}>Dokumen Persyaratan</h3>
               <p className={styles.uploadSectionSubtitle}>
@@ -411,7 +430,7 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
           {renderUploadArea(
             'Kartu Tanda Mahasiswa (KTM)',
             'Upload foto KTM yang masih berlaku',
-            '🪪',
+            Contact,
             ktmFile,
             uploadingKtm,
             ktmInputRef,
@@ -425,7 +444,7 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
           {renderUploadArea(
             'Proposal Kegiatan',
             'Upload proposal/surat kegiatan dalam format PDF',
-            '📋',
+            ClipboardList,
             proposalFile,
             uploadingProposal,
             proposalInputRef,
@@ -442,7 +461,9 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
       {isEksternal && (
         <div className={styles.uploadSection}>
           <div className={styles.uploadSectionHeader}>
-            <span className={styles.uploadSectionIcon}>💳</span>
+            <span className={styles.uploadSectionIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CreditCard size={18} />
+            </span>
             <div>
               <h3 className={styles.uploadSectionTitle}>Pembayaran</h3>
               <p className={styles.uploadSectionSubtitle}>
@@ -457,8 +478,8 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
             </label>
             <div className={styles.paymentMethodGrid}>
               {[
-                { value: 'BANK_TRANSFER', label: 'Transfer Bank', icon: '🏦', desc: 'Virtual Account (VA) Otomatis' },
-                { value: 'QRIS', label: 'QRIS / E-Wallet', icon: '📱', desc: 'Scan QRIS (GoPay, OVO, Dana)' },
+                { value: 'BANK_TRANSFER', label: 'Transfer Bank', icon: Landmark, desc: 'Virtual Account (VA) Otomatis' },
+                { value: 'QRIS', label: 'QRIS / E-Wallet', icon: Smartphone, desc: 'Scan QRIS (GoPay, OVO, Dana)' },
               ].map((method) => (
                 <button
                   key={method.value}
@@ -466,7 +487,9 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
                   className={`${styles.paymentMethodCard} ${paymentMethod === method.value ? styles.paymentMethodCardActive : ''}`}
                   onClick={() => setPaymentMethod(method.value)}
                 >
-                  <span className={styles.paymentMethodIcon}>{method.icon}</span>
+                  <span className={styles.paymentMethodIcon} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-600)' }}>
+                    <method.icon size={24} />
+                  </span>
                   <span className={styles.paymentMethodLabel}>{method.label}</span>
                   <span className={styles.paymentMethodDesc}>{method.desc}</span>
                 </button>
@@ -485,8 +508,18 @@ export default function BookingForm({ facility, userRole }: BookingFormProps) {
         {isEksternal && paymentMethod && (
           <div className={styles.priceRow}>
             <span>Metode Pembayaran</span>
-            <span>
-              {paymentMethod === 'BANK_TRANSFER' ? '🏦 Transfer Bank' : '📱 QRIS / E-Wallet'}
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {paymentMethod === 'BANK_TRANSFER' ? (
+                <>
+                  <Landmark size={14} style={{ color: 'var(--primary-600)' }} />
+                  <span>Transfer Bank</span>
+                </>
+              ) : (
+                <>
+                  <Smartphone size={14} style={{ color: 'var(--primary-600)' }} />
+                  <span>QRIS / E-Wallet</span>
+                </>
+              )}
             </span>
           </div>
         )}

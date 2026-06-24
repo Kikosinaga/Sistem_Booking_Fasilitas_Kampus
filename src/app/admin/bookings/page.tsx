@@ -6,6 +6,10 @@ import Link from 'next/link'
 import styles from '../dashboard/admin.module.css'
 import bookingStyles from './bookings.module.css'
 import { formatDate, formatTime, getBookingStatusLabel, formatCurrency, getRoleLabel } from '@/lib/utils'
+import { 
+  BarChart3, ClipboardList, Building2, Globe, LogOut, FileText, 
+  CheckSquare, XSquare, Contact, Receipt, Landmark, Smartphone, Coins 
+} from 'lucide-react'
 
 export default async function AdminBookingsPage() {
   const session = await auth()
@@ -29,24 +33,24 @@ export default async function AdminBookingsPage() {
         <nav className={styles.sidebarNav}>
           <div className={styles.sidebarSection}>
             <span className={styles.sidebarSectionTitle}>Menu Utama</span>
-            <Link href="/admin/dashboard" className={styles.sidebarLink}>
-              <span>📊</span> Dashboard
+            <Link href="/admin/dashboard" className={styles.sidebarLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={16} /> Dashboard
             </Link>
-            <Link href="/admin/bookings" className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`}>
-              <span>📋</span> Booking
+            <Link href="/admin/bookings" className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ClipboardList size={16} /> Booking
             </Link>
-            <Link href="/admin/facilities" className={styles.sidebarLink}>
-              <span>🏢</span> Fasilitas
+            <Link href="/admin/facilities" className={styles.sidebarLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Building2 size={16} /> Fasilitas
             </Link>
           </div>
           <div className={styles.sidebarSection}>
             <span className={styles.sidebarSectionTitle}>Lainnya</span>
-            <Link href="/" className={styles.sidebarLink}>
-              <span>🌐</span> Lihat Website
+            <Link href="/" className={styles.sidebarLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Globe size={16} /> Lihat Website
             </Link>
             <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }) }}>
-              <button type="submit" className={styles.sidebarLink} style={{ width: '100%' }}>
-                <span>🚪</span> Keluar
+              <button type="submit" className={styles.sidebarLink} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
+                <LogOut size={16} /> Keluar
               </button>
             </form>
           </div>
@@ -65,7 +69,9 @@ export default async function AdminBookingsPage() {
         <div className={styles.pageContent}>
           {bookings.length === 0 ? (
             <div className={bookingStyles.emptyState}>
-              <div className={bookingStyles.emptyIcon}>📋</div>
+              <div className={bookingStyles.emptyIcon} style={{ display: 'flex', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+                <ClipboardList size={48} />
+              </div>
               <h3>Belum ada booking</h3>
               <p>Booking akan muncul di sini ketika pengguna mengajukan peminjaman fasilitas</p>
             </div>
@@ -144,17 +150,45 @@ export default async function AdminBookingsPage() {
                                     }`}
                                     title={`Lihat ${doc.documentType === 'KTM' ? 'KTM' : doc.documentType === 'PROPOSAL' ? 'Proposal' : doc.documentType === 'PAYMENT_PROOF' ? 'Bukti Bayar' : doc.fileName}`}
                                   >
-                                    {doc.documentType === 'KTM' ? '🪪 KTM' :
-                                     doc.documentType === 'PROPOSAL' ? '📋 Proposal' :
-                                     doc.documentType === 'PAYMENT_PROOF' ? '🧾 Bukti Bayar' :
-                                     `📄 ${doc.fileName}`}
+                                    {doc.documentType === 'KTM' ? (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <Contact size={12} /> KTM
+                                      </span>
+                                    ) : doc.documentType === 'PROPOSAL' ? (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <ClipboardList size={12} /> Proposal
+                                      </span>
+                                    ) : doc.documentType === 'PAYMENT_PROOF' ? (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <Receipt size={12} /> Bukti Bayar
+                                      </span>
+                                    ) : (
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <FileText size={12} /> {doc.fileName.slice(0, 8)}...
+                                      </span>
+                                    )}
                                   </a>
                                 ))}
                                 {booking.paymentMethod && booking.paymentMethod !== 'FREE' && (
-                                  <span className={bookingStyles.paymentMethodBadge}>
-                                    {booking.paymentMethod === 'BANK_TRANSFER' ? '🏦 Transfer' :
-                                     booking.paymentMethod === 'QRIS' ? '📱 QRIS' :
-                                     booking.paymentMethod === 'EWALLET' ? '💰 E-Wallet' : booking.paymentMethod}
+                                  <span className={bookingStyles.paymentMethodBadge} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    {booking.paymentMethod === 'BANK_TRANSFER' ? (
+                                      <>
+                                        <Landmark size={12} />
+                                        <span>Transfer</span>
+                                      </>
+                                    ) : booking.paymentMethod === 'QRIS' ? (
+                                      <>
+                                        <Smartphone size={12} />
+                                        <span>QRIS</span>
+                                      </>
+                                    ) : booking.paymentMethod === 'EWALLET' ? (
+                                      <>
+                                        <Coins size={12} />
+                                        <span>E-Wallet</span>
+                                      </>
+                                    ) : (
+                                      <span>{booking.paymentMethod}</span>
+                                    )}
                                   </span>
                                 )}
                               </>
@@ -172,13 +206,13 @@ export default async function AdminBookingsPage() {
                           {booking.status === 'PENDING' && (
                             <div className={bookingStyles.actionButtons}>
                               <form action={async () => { 'use server'; await approveBooking(booking.id) }}>
-                                <button type="submit" className={bookingStyles.approveBtn}>
-                                  ✅ Setujui
+                                <button type="submit" className={bookingStyles.approveBtn} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <CheckSquare size={14} /> Setujui
                                 </button>
                               </form>
                               <form action={async () => { 'use server'; await rejectBooking(booking.id, 'Ditolak oleh admin') }}>
-                                <button type="submit" className={bookingStyles.rejectBtn}>
-                                  ❌ Tolak
+                                <button type="submit" className={bookingStyles.rejectBtn} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <XSquare size={14} /> Tolak
                                 </button>
                               </form>
                             </div>
@@ -186,8 +220,8 @@ export default async function AdminBookingsPage() {
                           {booking.status === 'APPROVED' && booking.paymentStatus !== 'PAID' && (
                             <div className={bookingStyles.actionButtons}>
                               <form action={async () => { 'use server'; await rejectBooking(booking.id, 'Ditolak oleh admin') }}>
-                                <button type="submit" className={bookingStyles.rejectBtn}>
-                                  ❌ Batalkan
+                                <button type="submit" className={bookingStyles.rejectBtn} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <XSquare size={14} /> Batalkan
                                 </button>
                               </form>
                             </div>
