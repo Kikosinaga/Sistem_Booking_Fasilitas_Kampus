@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { snap } from '@/lib/midtrans'
+import { snap, coreApi } from '@/lib/midtrans'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 
@@ -252,12 +252,124 @@ export async function createBooking(formData: FormData) {
 
 
 
+// Helper function to sync booking status from Midtrans on the fly
+async function syncPaymentStatus(booking: any) {
+  if (
+    booking.isFree ||
+    !booking.payment ||
+    booking.payment.status !== 'PENDING' ||
+    !booking.payment.transactionId
+  ) {
+    return false
+  }
+
+  try {
+    const orderId = booking.payment.transactionId
+    const statusResponse = await coreApi.transaction.status(orderId)
+    const transactionStatus = statusResponse.transaction_status
+    const fraudStatus = statusResponse.fraud_status
+
+    let paymentStatus = booking.payment.status
+
+    if (transactionStatus === 'capture') {
+      if (fraudStatus === 'challenge') {
+        paymentStatus = 'PENDING'
+      } else if (fraudStatus === 'accept') {
+        paymentStatus = 'PAID'
+      }
+    } else if (transactionStatus === 'settlement') {
+      paymentStatus = 'PAID'
+    } else if (
+      transactionStatus === 'cancel' ||
+      transactionStatus === 'deny' ||
+      transactionStatus === 'expire'
+    ) {
+      paymentStatus = 'FAILED'
+    } else if (transactionStatus === 'pending') {
+      paymentStatus = 'PENDING'
+    }
+
+    if (paymentStatus !== booking.payment.status) {
+      await prisma.$transaction(async (tx) => {
+        // Update payment record
+        await tx.payment.update({
+          where: { id: booking.payment.id },
+          data: {
+            status: paymentStatus as any,
+            paidAt: paymentStatus === 'PAID' ? new Date() : undefined,
+          }
+        })
+
+        // Update booking status if paid
+        if (paymentStatus === 'PAID') {
+          await tx.booking.update({
+            where: { id: booking.id },
+            data: {
+              paymentStatus: 'PAID',
+              status: 'PAID'
+            }
+          })
+
+          // Generate QR code if it doesn't already exist
+          const existingQR = await tx.qRVerification.findUnique({
+            where: { bookingId: booking.id }
+          })
+          if (!existingQR) {
+            await tx.qRVerification.create({
+              data: {
+                bookingId: booking.id,
+                code: `BK-${booking.id.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+              }
+            })
+          }
+
+          // Create notification for admin
+          const admins = await tx.user.findMany({
+            where: { role: 'ADMIN' },
+            select: { id: true },
+          })
+
+          await tx.notification.createMany({
+            data: admins.map((admin: { id: string }) => ({
+              userId: admin.id,
+              title: 'Pembayaran Diterima (Sync)',
+              message: `Pembayaran untuk booking "${booking.title}" telah berhasil terverifikasi via status check.`,
+              type: 'PAYMENT_RECEIVED',
+              bookingId: booking.id,
+            })),
+          })
+
+          // Create notification for user
+          await tx.notification.create({
+            data: {
+              userId: booking.userId,
+              title: 'Pembayaran Berhasil (Sync)',
+              message: `Pembayaran untuk booking "${booking.title}" telah berhasil. Tiket QR Code Anda telah diterbitkan.`,
+              type: 'PAYMENT_RECEIVED',
+              bookingId: booking.id,
+            }
+          })
+        } else if (paymentStatus === 'FAILED') {
+          await tx.booking.update({
+            where: { id: booking.id },
+            data: { paymentStatus: 'FAILED' }
+          })
+        }
+      })
+      return true
+    }
+  } catch (err) {
+    console.error('Failed to sync booking payment status:', err)
+  }
+  return false
+}
+
 // Get user's bookings
 export async function getUserBookings() {
   const session = await auth()
   if (!session?.user) return []
 
-  return await prisma.booking.findMany({
+  const bookings = await prisma.booking.findMany({
     where: { userId: session.user.id },
     include: {
       facility: true,
@@ -267,11 +379,32 @@ export async function getUserBookings() {
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  let hasChanges = false
+  for (const booking of bookings) {
+    const changed = await syncPaymentStatus(booking)
+    if (changed) hasChanges = true
+  }
+
+  if (hasChanges) {
+    return await prisma.booking.findMany({
+      where: { userId: session.user.id },
+      include: {
+        facility: true,
+        payment: true,
+        documents: true,
+        qrVerification: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  return bookings
 }
 
 // Get booking by ID
 export async function getBookingById(id: string) {
-  return await prisma.booking.findUnique({
+  const booking = await prisma.booking.findUnique({
     where: { id },
     include: {
       user: {
@@ -283,6 +416,26 @@ export async function getBookingById(id: string) {
       qrVerification: true,
     },
   })
+
+  if (!booking) return null
+
+  const changed = await syncPaymentStatus(booking)
+  if (changed) {
+    return await prisma.booking.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, role: true, nim: true, phone: true, organization: true },
+        },
+        facility: true,
+        payment: true,
+        documents: true,
+        qrVerification: true,
+      },
+    })
+  }
+
+  return booking
 }
 
 // Cancel booking
