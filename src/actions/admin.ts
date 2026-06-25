@@ -704,4 +704,87 @@ export async function getQRDetails(code: string) {
   }
 }
 
+// Confirm payment manually (admin fallback)
+export async function confirmPaymentManually(bookingId: string) {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return { error: 'Unauthorized' }
+  }
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { payment: true, user: true, facility: true },
+    })
+
+    if (!booking) return { error: 'Booking tidak ditemukan' }
+
+    await prisma.$transaction(async (tx) => {
+      // Update payment record if it exists
+      if (booking.payment) {
+        await tx.payment.update({
+          where: { id: booking.payment.id },
+          data: {
+            status: 'PAID',
+            paidAt: new Date(),
+          }
+        })
+      } else {
+        // Create a dummy payment record if it didn't exist
+        await tx.payment.create({
+          data: {
+            bookingId: booking.id,
+            amount: booking.totalPrice,
+            method: booking.paymentMethod || 'BANK_TRANSFER',
+            status: 'PAID',
+            paidAt: new Date(),
+          }
+        })
+      }
+
+      // Update booking status to PAID
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          paymentStatus: 'PAID',
+          status: 'PAID',
+        },
+      })
+
+      // Generate QR code
+      const existingQR = await tx.qRVerification.findUnique({
+        where: { bookingId }
+      })
+      if (!existingQR) {
+        await tx.qRVerification.create({
+          data: {
+            bookingId,
+            code: `BK-${bookingId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+          }
+        })
+      }
+
+      // Notify user
+      await tx.notification.create({
+        data: {
+          userId: booking.userId,
+          title: 'Pembayaran Dikonfirmasi Manual',
+          message: `Pembayaran Anda untuk booking "${booking.title}" telah dikonfirmasi secara manual oleh admin.`,
+          type: 'PAYMENT_RECEIVED',
+          bookingId,
+        },
+      })
+    })
+
+    revalidatePath('/admin/bookings')
+    revalidatePath('/dashboard')
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('Failed to confirm payment manually:', err)
+    return { error: `Gagal mengonfirmasi pembayaran: ${err.message || err.toString()}` }
+  }
+}
+
+
 

@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getAllBookings, approveBooking, rejectBooking } from '@/actions/admin'
+import { getAllBookings, approveBooking, rejectBooking, confirmPaymentManually } from '@/actions/admin'
 import { signOut } from '@/lib/auth'
 import Link from 'next/link'
 import styles from '../dashboard/admin.module.css'
@@ -225,6 +225,11 @@ export default async function AdminBookingsPage() {
                           )}
                           {booking.status === 'APPROVED' && booking.paymentStatus !== 'PAID' && (
                             <div className={bookingStyles.actionButtons}>
+                              <form action={async () => { 'use server'; await confirmPaymentManually(booking.id) }}>
+                                <button type="submit" className={bookingStyles.approveBtn} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <CheckSquare size={14} /> Konfirmasi Bayar
+                                </button>
+                              </form>
                               <form action={async () => { 'use server'; await rejectBooking(booking.id, 'Ditolak oleh admin') }}>
                                 <button type="submit" className={bookingStyles.rejectBtn} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                   <XSquare size={14} /> Batalkan
