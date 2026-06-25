@@ -10,9 +10,9 @@ export default auth((req) => {
   const userRole = req.auth?.user?.role
 
   // Public routes
-  const publicRoutes = ['/', '/login', '/register', '/api/auth']
+  const publicRoutes = ['/', '/login', '/register', '/api/auth', '/api/debug-midtrans']
   const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith('/api/auth')
+    (route) => pathname === route || pathname.startsWith('/api/auth') || pathname.startsWith('/api/debug-midtrans')
   )
 
   if (isPublicRoute) {
