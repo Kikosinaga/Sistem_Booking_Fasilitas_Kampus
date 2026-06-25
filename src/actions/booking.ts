@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { snap } from '@/lib/midtrans'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 
 // Get all facilities
 export async function getFacilities() {
@@ -355,6 +356,11 @@ export async function getOrCreateSnapToken(bookingId: string) {
   )
 
   try {
+    const headersList = await headers()
+    const host = headersList.get('host')
+    const protocol = headersList.get('x-forwarded-proto') || 'http'
+    const appUrl = `${protocol}://${host}`
+
     const parameter = {
       transaction_details: {
         order_id: orderId,
@@ -371,7 +377,12 @@ export async function getOrCreateSnapToken(bookingId: string) {
           quantity: hours,
           name: booking.facility.name,
         }
-      ]
+      ],
+      callbacks: {
+        finish: `${appUrl}/dashboard`,
+        error: `${appUrl}/dashboard`,
+        pending: `${appUrl}/dashboard`
+      }
     }
 
     const transaction = await snap.createTransaction(parameter)

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { snap } from '@/lib/midtrans'
 
 // Get all bookings (admin)
@@ -57,6 +58,11 @@ export async function approveBooking(bookingId: string, note?: string) {
       const hours = Math.ceil(
         (booking.endTime.getTime() - booking.startTime.getTime()) / (1000 * 60 * 60)
       )
+      const headersList = await headers()
+      const host = headersList.get('host')
+      const protocol = headersList.get('x-forwarded-proto') || 'http'
+      const appUrl = `${protocol}://${host}`
+
       const parameter = {
         transaction_details: {
           order_id: orderId,
@@ -73,7 +79,12 @@ export async function approveBooking(bookingId: string, note?: string) {
             quantity: hours,
             name: booking.facility.name,
           }
-        ]
+        ],
+        callbacks: {
+          finish: `${appUrl}/dashboard`,
+          error: `${appUrl}/dashboard`,
+          pending: `${appUrl}/dashboard`
+        }
       }
 
       const transaction = await snap.createTransaction(parameter)

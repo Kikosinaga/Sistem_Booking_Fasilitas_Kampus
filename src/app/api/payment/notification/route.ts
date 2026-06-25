@@ -13,8 +13,8 @@ export async function POST(request: Request) {
     const transactionStatus = notification.transaction_status
     const fraudStatus = notification.fraud_status
     
-    // Extract booking ID (assuming order_id format is "BOOK-{id}")
-    const bookingId = orderId.replace('BOOK-', '')
+    // Extract booking ID (assuming order_id format is "BOOK-{id}-{timestamp}")
+    const bookingId = orderId.replace('BOOK-', '').split('-')[0]
 
     const payment = await prisma.payment.findUnique({
       where: { bookingId },
@@ -61,12 +61,12 @@ export async function POST(request: Request) {
     // Update booking status and generate access code if paid
     if (paymentStatus === 'PAID') {
       await prisma.$transaction(async (tx) => {
-        // Update booking status to APPROVED and paymentStatus to PAID
+        // Update booking status to PAID and paymentStatus to PAID
         await tx.booking.update({
           where: { id: bookingId },
           data: { 
             paymentStatus: 'PAID',
-            status: 'APPROVED'
+            status: 'PAID'
           }
         })
 
