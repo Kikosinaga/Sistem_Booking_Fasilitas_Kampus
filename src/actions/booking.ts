@@ -265,9 +265,32 @@ async function syncPaymentStatus(booking: any) {
 
   try {
     const orderId = booking.payment.transactionId
+
+    // Debug: buat notifikasi status pencarian
+    await prisma.notification.create({
+      data: {
+        userId: booking.userId,
+        title: 'Midtrans Sync: Checking...',
+        message: `Memeriksa transaksi Midtrans dengan ID: ${orderId}`,
+        type: 'GENERAL',
+        bookingId: booking.id,
+      }
+    })
+
     const statusResponse = await coreApi.transaction.status(orderId)
     const transactionStatus = statusResponse.transaction_status
     const fraudStatus = statusResponse.fraud_status
+
+    // Debug: buat notifikasi hasil pencarian
+    await prisma.notification.create({
+      data: {
+        userId: booking.userId,
+        title: 'Midtrans Sync: Checked!',
+        message: `Status: ${transactionStatus}, Fraud: ${fraudStatus}, Order ID: ${orderId}`,
+        type: 'GENERAL',
+        bookingId: booking.id,
+      }
+    })
 
     let paymentStatus = booking.payment.status
 
@@ -358,8 +381,18 @@ async function syncPaymentStatus(booking: any) {
       })
       return true
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to sync booking payment status:', err)
+    // Debug: buat notifikasi error
+    await prisma.notification.create({
+      data: {
+        userId: booking.userId,
+        title: 'Midtrans Sync Error',
+        message: `Gagal memeriksa status: ${err.message || err.toString()}`,
+        type: 'GENERAL',
+        bookingId: booking.id,
+      }
+    })
   }
   return false
 }
