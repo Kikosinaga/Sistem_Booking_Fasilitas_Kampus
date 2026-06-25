@@ -344,10 +344,6 @@ export async function getOrCreateSnapToken(bookingId: string) {
     return { error: 'Booking ini gratis, tidak memerlukan pembayaran' }
   }
 
-  // If there's already a valid snapToken in the payment record, we can return it.
-  if (booking.payment && booking.payment.snapToken) {
-    return { snapToken: booking.payment.snapToken }
-  }
 
   // Generate a new one if it failed or does not exist
   const orderId = `BOOK-${booking.id}-${Date.now()}`
